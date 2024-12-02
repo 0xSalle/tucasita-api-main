@@ -3,68 +3,70 @@
 
 import logging
 import os
-
+from dotenv import load_dotenv
 from flask import Flask
+from flask_restx import Api
 
-from api.conf.config import SQLALCHEMY_DATABASE_URI
+# Import configurations and modules
+from api.conf.config import SQLALCHEMY_DATABASE_URI, debug_status, port
 from api.conf.routes import generate_routes
 from api.database.database import db
-from api.db_initializer.db_initializer import create_admin_user, create_super_admin, create_test_user, create_test_property_agent
-from api.conf.config import debug_status, port
+from api.db_initializer.db_initializer import (
+    create_admin_user,
+    create_super_admin,
+    create_test_user,
+    create_test_property_agent,
+)
+
+# Load environment variables from .env
+load_dotenv()
 
 def create_app():
-
-    # Create a flask app.
+    # Create a Flask app
     app = Flask(__name__)
 
-    # Set debug true for catching the errors.
-    app.config['DEBUG'] = debug_status
+    # Create an API object for Swagger documentation
+    api = Api(
+        app,
+        version="1.0",
+        title="My Flask API",
+        description="A simple API with auto-generated OpenAPI documentation",
+        doc="/api-docs",  # Swagger UI documentation endpoint
+    )
 
-    # Set database url.
-    app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
+    # Configure the app
+    app.config["DEBUG"] = debug_status
+    app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
-
-    # Set application port
-    app.config['PORT'] = port
-
-    # Generate routes.
-    generate_routes(app)
-
-    # Database initialize with app.
+    # Initialize database with the app
     db.init_app(app)
 
-    # Check if there is no database.
-    if not os.path.exists(SQLALCHEMY_DATABASE_URI):
+    # Check if the database exists
+    database_file_path = SQLALCHEMY_DATABASE_URI.replace("sqlite:///", "")  # Adjust for SQLite
+    if not os.path.exists(database_file_path):
+        with app.app_context():
+            # Create all database tables
+            db.create_all()
 
-        # New db app if no database.
-        db.app = app
+            # Populate the database with default values
+            create_super_admin()
+            create_admin_user()
+            create_test_user()
+            create_test_property_agent()
 
-        # Create all database tables.
-        db.create_all()
+    # Generate routes and register them with the API
+    generate_routes(api)
 
-        # Create default super admin user in database.
-        create_super_admin()
-
-        # Create default admin user in database.
-        create_admin_user()
-
-        # Create default test user in database.
-        create_test_user()
-
-        # Create default property agent user in database
-        create_test_property_agent()
-
-    # Return app.
     return app
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+    # Set up logging
     logging.basicConfig(level=logging.INFO)
-    
-    # Create app.
+
+    # Create the Flask app
     app = create_app()
 
-    # Run app. For production use another web server.
-    # Set debug and use_reloader parameters as False.
-    app.run(port=port, debug=debug_status, host='localhost', use_reloader=True)
+    # Run the app (use a production-ready server like Gunicorn in production)
+    app.run(port=port, debug=debug_status, host="0.0.0.0", use_reloader=False)
