@@ -1,0 +1,146 @@
+{
+    "swagger": "2.0",
+    "basePath": "/",
+    "paths": {
+        "/v1/address": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "operationId": "get_address",
+                "tags": [
+                    "v1"
+                ]
+            }
+        },
+        "/v1/auth/login": {
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "operationId": "post_login",
+                "tags": [
+                    "v1"
+                ]
+            }
+        },
+        "/v1/auth/logout": {
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "operationId": "post_logout",
+                "tags": [
+                    "v1"
+                ]
+            }
+        },
+        "/v1/auth/password_reset": {
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "operationId": "post_reset_password",
+                "tags": [
+                    "v1"
+                ]
+            },
+            "put": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "operationId": "put_reset_password",
+                "tags": [
+                    "v1"
+                ]
+            }
+        },
+        "/v1/auth/refresh": {
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "operationId": "post_refresh_token",
+                "tags": [
+                    "v1"
+                ]
+            }
+        },
+        "/v1/auth/register": {
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "operationId": "post_register",
+                "tags": [
+                    "v1"
+                ]
+            }
+        },
+        "/v1/user_info": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "operationId": "get_user_info",
+                "tags": [
+                    "v1"
+                ]
+            }
+        },
+        "/v1/users": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "operationId": "get_users_data",
+                "tags": [
+                    "v1"
+                ]
+            }
+        }
+    },
+    "info": {
+        "title": "My Flask API",
+        "version": "1.0",
+        "description": "A simple API with auto-generated OpenAPI documentation"
+    },
+    "produces": [
+        "application/json"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "tags": [
+        {
+            "name": "v1",
+            "description": "API v1 routes"
+        }
+    ],
+    "responses": {
+        "ParseError": {
+            "description": "When a mask can't be parsed"
+        },
+        "MaskError": {
+            "description": "When any error occurs on mask"
+        }
+    }
+}
