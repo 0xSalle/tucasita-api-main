@@ -1,0 +1,27 @@
+name: ZAP CI Scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+  workflow_dispatch:
+
+jobs:
+  scans:
+    runs-on: ubuntu-latest
+    name: ZAP API Scan
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Log current directory
+        run: echo ${PWD}
+      - name: Pull ZAP OWASP Image
+        run: docker pull owasp/zap2docker-weekly
+      - name: Run ZAP API Scan
+        run: |
+          sudo docker run -v $(pwd):/zap/wrk/:rw \
+            -t owasp/zap2docker-weekly zap-api-scan.py \
+            -t openapi.json -f openapi -c api-scan.conf
