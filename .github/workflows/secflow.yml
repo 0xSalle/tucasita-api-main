@@ -1,0 +1,91 @@
+name: Security Workflows
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '38 9 * * 1' # CodeQL Schedule
+    - cron: '20 17 * * *' # Semgrep Schedule
+
+jobs:
+  zap_scan:
+    runs-on: ubuntu-latest
+    name: ZAP API Scan
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Log current directory
+        run: echo ${PWD}
+
+      - name: Verify OpenAPI File
+        run: |
+          if [ ! -f openapi.json ]; then
+            echo "openapi.json file not found. Ensure it exists in your repository."
+            exit 1
+          fi
+
+      - name: Pull ZAP OWASP Image
+        run: docker pull zaproxy/zap-weekly
+
+      - name: Run ZAP API Scan
+        run: |
+          docker run -v $(pwd):/zap/wrk/:rw \
+            -t zaproxy/zap-weekly zap-api-scan.py \
+            -t openapi.json -f openapi -g default.conf
+
+  codeql:
+    runs-on: ubuntu-latest
+    name: CodeQL Advanced Analysis
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - language: javascript-typescript
+          build-mode: none
+        - language: python
+          build-mode: none
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+
+      - if: matrix.build-mode == 'manual'
+        shell: bash
+        run: |
+          echo 'If you are using a "manual" build mode, replace this with your build commands.'
+          exit 1
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
+
+  semgrep:
+    runs-on: ubuntu-latest
+    name: Semgrep CI 
+    container:
+      image: returntocorp/semgrep
+    if: (github.actor != 'dependabot[bot]')
+
+    steps:
+      - uses: actions/checkout@v3
+      - run: semgrep scan --config=auto --no-git-ignore
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
