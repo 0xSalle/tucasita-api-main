@@ -19,9 +19,9 @@ jobs:
       - name: Log current directory
         run: echo ${PWD}
       - name: Pull ZAP OWASP Image
-        run: docker pull owasp/zap2docker-weekly
+        run: docker pull zaproxy/zap-weekly
       - name: Run ZAP API Scan
         run: |
           sudo docker run -v $(pwd):/zap/wrk/:rw \
-            -t owasp/zap2docker-weekly zap-api-scan.py \
+            -t zaproxy/zap-weekly zap-api-scan.py \
             -t openapi.json -f openapi -c api-scan.conf
