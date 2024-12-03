@@ -36,7 +36,7 @@ jobs:
         run: |
           docker run -v $(pwd):/zap/wrk/:rw \
             -t zaproxy/zap-weekly zap-api-scan.py \
-            -t http://3va.in/swagger.json -f openapi -g default.conf
+            -t http://3va.in:5000/swagger.json -f openapi -g default.conf
 
   codeql:
     runs-on: ubuntu-latest
