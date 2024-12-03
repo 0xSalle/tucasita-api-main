@@ -22,13 +22,6 @@ jobs:
       - name: Log current directory
         run: echo ${PWD}
 
-      - name: Verify OpenAPI File
-        run: |
-          if [ ! -f openapi.json ]; then
-            echo "openapi.json file not found. Ensure it exists in your repository."
-            exit 1
-          fi
-
       - name: Pull ZAP OWASP Image
         run: docker pull zaproxy/zap-weekly
 
@@ -36,7 +29,7 @@ jobs:
         run: |
           docker run -v $(pwd):/zap/wrk/:rw \
             -t zaproxy/zap-weekly zap-api-scan.py \
-            -t http://3va.in:5000/swagger.json -f openapi -g default.conf
+            -t http://3va.in:5000/swagger.json -f openapi -g gen.conf -r report.html
 
   codeql:
     runs-on: ubuntu-latest
