@@ -27,7 +27,7 @@ jobs:
 
       - name: Run ZAP API Scan
         run: |
-          docker run -v $(pwd):/zap/wrk/:rw \
+          sudo docker run -v $(pwd):/zap/wrk/:rw \
             -t zaproxy/zap-weekly zap-api-scan.py \
             -t http://3va.in:5000/swagger.json -f openapi -g gen.conf -r report.html
 
