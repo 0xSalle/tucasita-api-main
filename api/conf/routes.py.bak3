@@ -1,0 +1,65 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+from flask_restx import Api, Namespace, Resource, fields
+from api.conf.config import debug_status
+
+from api.handlers.UserHandlers import (
+    Address,
+    Login,
+    Logout,
+    RefreshToken,
+    Register,
+    ResetPassword,
+    UsersData,
+    UserInfo,
+)
+
+def generate_routes(api):
+    # Create a namespace for version 1 (v1) routes
+    ns = Namespace("v1", description="API v1 routes")
+
+    # Define models for schemas
+    login_model = ns.model("LoginRequest", {
+        "email": fields.String(required=True, description="The user email", example="user@example.com"),
+        "password": fields.String(required=True, description="The user password", example="securepassword123"),
+    })
+
+    register_model = ns.model("RegisterRequest", {
+        "username": fields.String(required=True, description="The username", example="john_doe"),
+        "email": fields.String(required=True, description="The user email", example="john_doe@example.com"),
+        "password": fields.String(required=True, description="The user password", example="securepassword123"),
+    })
+
+    refresh_token_model = ns.model("RefreshTokenRequest", {
+        "refresh_token": fields.String(required=True, description="The refresh token", example="example_refresh_token"),
+    })
+
+    reset_password_request_model = ns.model("ResetPasswordRequest", {
+        "email": fields.String(required=True, description="The user email", example="user@example.com"),
+    })
+
+    reset_password_update_model = ns.model("ResetPasswordUpdate", {
+        "token": fields.String(required=True, description="Reset token", example="example_token"),
+        "new_pass": fields.String(required=True, description="New password", example="new_secure_password123"),
+    })
+
+    # Add routes and attach models
+    ns.add_resource(Register, "/auth/register", endpoint="register")
+    ns.add_resource(Login, "/auth/login", endpoint="login", resource_class_kwargs={"expect_model": login_model})
+    ns.add_resource(Logout, "/auth/logout", endpoint="logout")
+    ns.add_resource(RefreshToken, "/auth/refresh", endpoint="refresh", resource_class_kwargs={"expect_model": refresh_token_model})
+    ns.add_resource(ResetPassword, "/auth/password_reset", endpoint="password_reset", resource_class_kwargs={
+        "post_model": reset_password_request_model,
+        "put_model": reset_password_update_model,
+    })
+
+    ns.add_resource(Address, "/address", endpoint="address")
+    ns.add_resource(UserInfo, "/user_info", endpoint="user_info")
+
+    # Debug-only routes
+    if debug_status:
+        ns.add_resource(UsersData, "/users", endpoint="users")
+
+    # Register the namespace with the API
+    api.add_namespace(ns)

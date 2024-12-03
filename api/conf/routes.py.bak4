@@ -1,0 +1,99 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+from flask_restx import Api, Namespace, Resource, fields
+from api.conf.config import debug_status
+
+from api.handlers.UserHandlers import ns as user_ns
+
+from api.handlers.UserHandlers import (
+    Address,
+    Index,
+    Login,
+    Logout,
+    RefreshToken,
+    Register,
+    ResetPassword,
+    UsersData,
+    UserInfo,
+)
+
+
+def generate_routes(api):
+    # Create a namespace for version 1 (v1) routes
+    ns = Namespace("v1", description="API v1 routes")
+
+    # Define request and response models
+    register_model = ns.model("RegisterRequest", {
+        "username": fields.String(required=True, description="The username", example="john_doe"),
+        "email": fields.String(required=True, description="The user email", example="john_doe@example.com"),
+        "password": fields.String(required=True, description="The user password", example="securepassword123"),
+    })
+
+    login_model = ns.model("LoginRequest", {
+        "email": fields.String(required=True, description="The user email", example="user@example.com"),
+        "password": fields.String(required=True, description="The user password", example="securepassword123"),
+    })
+
+    login_response_model = ns.model("LoginResponse", {
+        "access_token": fields.String(description="JWT access token", example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."),
+        "refresh_token": fields.String(description="JWT refresh token", example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."),
+    })
+
+    address_response_model = ns.model("AddressResponse", {
+        "address": fields.String(description="User's address", example="123 Main St, Springfield"),
+    })
+
+    user_info_model = ns.model("UserInfoResponse", {
+        "username": fields.String(description="The username", example="john_doe"),
+        "email": fields.String(description="The user email", example="john_doe@example.com"),
+        "phone": fields.String(description="The user phone number", example="+123456789"),
+        "address": fields.String(description="The user's address", example="123 Main St, Springfield"),
+        "agency_name": fields.String(description="Agency name", example="Real Estate Inc."),
+        "area_of_operation": fields.String(description="Area of operation", example="Springfield"),
+    })
+
+    # Define routes for authentication
+    ns.add_resource(Register, "/auth/register", endpoint="register")
+    @ns.expect(register_model)
+    @ns.doc(responses={200: "Registration completed", 400: "Invalid Input"})
+    def post_register():
+        pass
+
+    ns.add_resource(Login, "/auth/login", endpoint="login")
+    @ns.expect(login_model)
+    @ns.marshal_with(login_response_model)
+    def post_login():
+        pass
+
+    ns.add_resource(Logout, "/auth/logout", endpoint="logout")
+    @ns.doc(responses={200: "Logout successful"})
+    def post_logout():
+        pass
+
+    ns.add_resource(RefreshToken, "/auth/refresh", endpoint="refresh")
+    @ns.doc(responses={200: "Token refreshed", 401: "Invalid token"})
+    def post_refresh_token():
+        pass
+
+    ns.add_resource(ResetPassword, "/auth/password_reset", endpoint="password_reset")
+    @ns.doc(responses={200: "Password reset email sent", 400: "Invalid Input"})
+    def post_reset_password():
+        pass
+
+    ns.add_resource(Address, "/address", endpoint="address")
+    @ns.marshal_with(address_response_model)
+    def get_address():
+        pass
+
+    ns.add_resource(UserInfo, "/user_info", endpoint="user_info")
+    @ns.marshal_with(user_info_model)
+    def get_user_info():
+        pass
+
+    # Debug-only routes
+    if debug_status:
+        ns.add_resource(UsersData, "/users", endpoint="users")
+
+    # Register the namespace with the API
+    api.add_namespace(user_ns)

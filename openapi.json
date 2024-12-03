@@ -6,10 +6,23 @@
             "get": {
                 "responses": {
                     "200": {
-                        "description": "Success"
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/AddressResponse"
+                        }
                     }
                 },
+                "summary": "Get the address of the logged-in user",
                 "operationId": "get_address",
+                "parameters": [
+                    {
+                        "name": "X-Fields",
+                        "in": "header",
+                        "type": "string",
+                        "format": "mask",
+                        "description": "An optional fields mask"
+                    }
+                ],
                 "tags": [
                     "v1"
                 ]
@@ -19,10 +32,31 @@
             "post": {
                 "responses": {
                     "200": {
-                        "description": "Success"
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/LoginResponse"
+                        }
                     }
                 },
+                "summary": "Authenticate a user",
                 "operationId": "post_login",
+                "parameters": [
+                    {
+                        "name": "payload",
+                        "required": true,
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/LoginRequest"
+                        }
+                    },
+                    {
+                        "name": "X-Fields",
+                        "in": "header",
+                        "type": "string",
+                        "format": "mask",
+                        "description": "An optional fields mask"
+                    }
+                ],
                 "tags": [
                     "v1"
                 ]
@@ -35,6 +69,7 @@
                         "description": "Success"
                     }
                 },
+                "summary": "Logout the current user",
                 "operationId": "post_logout",
                 "tags": [
                     "v1"
@@ -48,6 +83,7 @@
                         "description": "Success"
                     }
                 },
+                "summary": "Send a password reset email",
                 "operationId": "post_reset_password",
                 "tags": [
                     "v1"
@@ -59,6 +95,7 @@
                         "description": "Success"
                     }
                 },
+                "summary": "Update the password",
                 "operationId": "put_reset_password",
                 "tags": [
                     "v1"
@@ -72,6 +109,7 @@
                         "description": "Success"
                     }
                 },
+                "summary": "Refresh the authentication token",
                 "operationId": "post_refresh_token",
                 "tags": [
                     "v1"
@@ -85,7 +123,18 @@
                         "description": "Success"
                     }
                 },
+                "summary": "Register a new user",
                 "operationId": "post_register",
+                "parameters": [
+                    {
+                        "name": "payload",
+                        "required": true,
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/RegisterRequest"
+                        }
+                    }
+                ],
                 "tags": [
                     "v1"
                 ]
@@ -98,6 +147,7 @@
                         "description": "Success"
                     }
                 },
+                "summary": "Get user information",
                 "operationId": "get_user_info",
                 "tags": [
                     "v1"
@@ -111,6 +161,7 @@
                         "description": "Success"
                     }
                 },
+                "summary": "Get data of all users (Admin only)",
                 "operationId": "get_users_data",
                 "tags": [
                     "v1"
@@ -135,6 +186,77 @@
             "description": "API v1 routes"
         }
     ],
+    "definitions": {
+        "RegisterRequest": {
+            "required": [
+                "email",
+                "password",
+                "username"
+            ],
+            "properties": {
+                "username": {
+                    "type": "string",
+                    "description": "The username",
+                    "example": "john_doe"
+                },
+                "email": {
+                    "type": "string",
+                    "description": "The user email",
+                    "example": "john_doe@example.com"
+                },
+                "password": {
+                    "type": "string",
+                    "description": "The user password",
+                    "example": "securepassword123"
+                }
+            },
+            "type": "object"
+        },
+        "LoginRequest": {
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "description": "The user email",
+                    "example": "user@example.com"
+                },
+                "password": {
+                    "type": "string",
+                    "description": "The user password",
+                    "example": "securepassword123"
+                }
+            },
+            "type": "object"
+        },
+        "LoginResponse": {
+            "properties": {
+                "access_token": {
+                    "type": "string",
+                    "description": "JWT access token",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                },
+                "refresh_token": {
+                    "type": "string",
+                    "description": "JWT refresh token",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                }
+            },
+            "type": "object"
+        },
+        "AddressResponse": {
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "description": "User's address",
+                    "example": "123 Main St, Springfield"
+                }
+            },
+            "type": "object"
+        }
+    },
     "responses": {
         "ParseError": {
             "description": "When a mask can't be parsed"
